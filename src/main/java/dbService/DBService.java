@@ -14,8 +14,6 @@ import java.util.Properties;
 
 public class DBService {
     private static final Logger LOGGER = LogManager.getLogger(DBService.class);
-    private static final String hibernate_show_sql = "true";
-    private static final String hibernate_hbm2ddl_auto = "update";
     private static final String CONFIG_FILE = "db_config.xml";
 
     private final SessionFactory sessionFactory;
@@ -28,17 +26,15 @@ public class DBService {
     private static Configuration getConfig() {
         Configuration configuration = new Configuration();
 //        configuration.addAnnotatedClass(UsersDataSet.class);
-
         Properties properties = new Properties();
-        try {
-            properties.loadFromXML(ClassLoader.getSystemResourceAsStream(CONFIG_FILE));
+        try (InputStream inputStream = ClassLoader.getSystemResourceAsStream(CONFIG_FILE)) {
+            if (inputStream != null) {
+                properties.loadFromXML(inputStream);
+            }
         } catch (IOException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.ERROR, "Hibernate configuration loading error. File: " + CONFIG_FILE, e);
         }
-
-        configuration.setProperties(properties);
-        configuration.setProperty("hibernate.show_sql", hibernate_show_sql);
-        configuration.setProperty("hibernate.hbm2ddl.auto", hibernate_hbm2ddl_auto);
+        configuration.addProperties(properties);
         return configuration;
     }
 
