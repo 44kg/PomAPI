@@ -38,7 +38,7 @@
                         <configuration>
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                                    <mainClass>app.Main</mainClass>
+                                    <mainClass>main.Main</mainClass>
                                 </transformer>
                             </transformers>
                         </configuration>
@@ -86,6 +86,5 @@
             <version>4.3.10.Final</version>
         </dependency>
     </dependencies>
-
 
 </project>

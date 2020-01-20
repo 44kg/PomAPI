@@ -18,9 +18,21 @@ public class Main {
         context.addServlet(new ServletHolder(new HttpServlet() {
             @Override
             protected void doGet(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+                String groupId = req.getParameter("groupId");
+                String artifactId = req.getParameter("artifactId");
+                String version = req.getParameter("version");
+
+                if (groupId == null || artifactId == null || version == null) {
+                    resp.setContentType("text/html;charset=utf-8");
+                    resp.getWriter().println("Wrong!");
+                    resp.setStatus(HttpServletResponse.SC_OK);
+                    return;
+                }
                 resp.setContentType("text/html;charset=utf-8");
-                resp.getWriter().println("Hello, World!");
+                resp.getWriter().println("Added!");
                 resp.setStatus(HttpServletResponse.SC_OK);
+
+
             }
         }), "/*");
 
