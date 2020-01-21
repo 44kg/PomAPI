@@ -1,6 +1,7 @@
 package dbService;
 
 import dbService.dao.GavsDAO;
+import dbService.dao.PomsDAO;
 import dbService.dataSets.GavDataSet;
 import dbService.dataSets.PomDataSet;
 import org.apache.log4j.Level;
@@ -8,6 +9,7 @@ import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
 import org.hibernate.cfg.Configuration;
 import org.hibernate.service.ServiceRegistry;
@@ -31,8 +33,17 @@ public class DBService {
         sessionFactory = createSessionFactory(configuration);
     }
 
-    public void insertPom(String pom) {
-
+    public void insertPom(String projectAttributes, String modelVersion, String otherCode, GavDataSet mainGav,
+                          Set<GavDataSet> dependentGavs) {
+        PomDataSet pomDataSet = new PomDataSet(projectAttributes, modelVersion, otherCode);
+        mainGav.setDependentGavs(dependentGavs);
+        pomDataSet.setGavDataSet(mainGav);
+        Session session = sessionFactory.openSession();
+        Transaction transaction = session.beginTransaction();
+        PomsDAO pomsDAO = new PomsDAO(session);
+        pomsDAO.insert(pomDataSet);
+        transaction.commit();
+        session.close();
     }
 
     public Set<GavDataSet> getDependentGavs(String groupId, String artifactId, String version) {
