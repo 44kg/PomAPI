@@ -4,16 +4,14 @@ import dbService.dataSets.GavDataSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
+import org.w3c.dom.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -71,24 +69,66 @@ public class PomDocument {
         return gavsSet;
     }
 
-//    public String getOtherCode() throws Exception {
-//        Node node = document.getElementsByTagName("project").item(0).cloneNode(true);
-//        int n = node.getChildNodes().getLength();
-//        for (int i = 0; i < n; i++) {
-//            node.removeChild(node.getChildNodes().item(0));
-//        }
-//        n = node.getAttributes().getLength();
-//        for (int i = 0; i < n; i++) {
-//            node.getAttributes().item(i).setNodeValue(null);
-//        }
-//        DOMSource domSource = new DOMSource(node);
-//        StringWriter writer = new StringWriter();
-//        StreamResult result = new StreamResult(writer);
-//        TransformerFactory tf = TransformerFactory.newInstance();
-//        Transformer transformer = tf.newTransformer();
-//        transformer.transform(domSource, result);
-//        return writer.toString();
-//    }
+    public String getOtherCode() {
+        Node node = document.cloneNode(true).getChildNodes().item(0);
+        removeTag(node, "dependencies");
+        removeTag(node, "modelVersion");
+        removeTag(node, "groupId");
+        removeTag(node, "artifactId");
+        removeTag(node, "version");
+        removeTextNodes(node);
+
+        NodeList nodeList = node.getChildNodes();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < nodeList.getLength(); i++) {
+            builder.append(getString(nodeList.item(i)));
+        }
+        return builder.toString();
+    }
+
+    private static void removeTextNodes(Node node) {
+        int i = 0;
+        while (node.getChildNodes().item(i) != null) {
+            if (node.getChildNodes().item(i).getNodeName().equalsIgnoreCase("#text")
+                    && node.getChildNodes().item(i).getTextContent().trim().equals("")) {
+                node.removeChild(node.getChildNodes().item(i));
+            } else {
+                i++;
+            }
+        }
+        NodeList nodeList = node.getChildNodes();
+        if (nodeList.getLength() > 0) {
+            int n = node.getChildNodes().getLength();
+            for (int j = 0; j < n; j++) {
+                removeTextNodes(nodeList.item(j));
+            }
+        }
+    }
+
+    private static void removeTag(Node node, String tagName) {
+        int i = 0;
+        while (node.getChildNodes().item(i) != null) {
+            if (node.getChildNodes().item(i).getNodeName().equalsIgnoreCase(tagName)) {
+                node.removeChild(node.getChildNodes().item(i));
+            } else {
+                i++;
+            }
+        }
+    }
+
+    private static String getString(Node node) {
+        DOMSource domSource = new DOMSource(node);
+        StringWriter writer = new StringWriter();
+        StreamResult result = new StreamResult(writer);
+        TransformerFactory tf = TransformerFactory.newInstance();
+        try {
+            Transformer transformer = tf.newTransformer();
+            transformer.transform(domSource, result);
+        } catch (TransformerException e) {
+            LOGGER.log(Level.ERROR, "", e);
+        }
+        return writer.toString();
+    }
 
     private static Document parseFromString(String xmlCOde) {
         try (InputStream inputStream = new ByteArrayInputStream(xmlCOde.getBytes(StandardCharsets.UTF_8))) {
