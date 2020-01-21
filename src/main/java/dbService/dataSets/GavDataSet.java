@@ -2,6 +2,7 @@ package dbService.dataSets;
 
 import javax.persistence.*;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
 @Entity
@@ -113,5 +114,31 @@ public class GavDataSet {
 
     public void addMainGav(GavDataSet gavDataSet) {
         this.mainGavs.add(gavDataSet);
+    }
+
+    @Override
+    public String toString() {
+        return  "GavDataSet={id=" + id + ", groupId='" + groupId + "', artifactId='" + artifactId + "', version='"
+                + version + "'}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        GavDataSet that = (GavDataSet) o;
+        if (!Objects.equals(groupId, that.groupId)) return false;
+        if (!Objects.equals(artifactId, that.artifactId)) return false;
+        if (!Objects.equals(version, that.version)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31;
+        result = 31 * result + (groupId != null ? groupId.hashCode() : 0);
+        result = 31 * result + (artifactId != null ? artifactId.hashCode() : 0);
+        result = 31 * result + (version != null ? version.hashCode() : 0);
+        return result;
     }
 }

@@ -1,6 +1,7 @@
 package dbService.dataSets;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "poms")
@@ -9,9 +10,6 @@ public class PomDataSet {
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
-
-    @Column(name = "head")
-    private String head;
 
     @Column(name = "project_attributes")
     private String projectAttributes;
@@ -27,15 +25,13 @@ public class PomDataSet {
 
     public PomDataSet() {}
 
-    public PomDataSet(String head, String projectAttributes, String modelVersion, String otherCode) {
-        this.setHead(head);
+    public PomDataSet(String projectAttributes, String modelVersion, String otherCode) {
         this.setProjectAttributes(projectAttributes);
         this.setModelVersion(modelVersion);
         this.setOtherCode(otherCode);
     }
 
-    public PomDataSet(String head, String projectAttributes, String modelVersion, String otherCode, GavDataSet gavDataSet) {
-        this.setHead(head);
+    public PomDataSet(String projectAttributes, String modelVersion, String otherCode, GavDataSet gavDataSet) {
         this.setProjectAttributes(projectAttributes);
         this.setModelVersion(modelVersion);
         this.setOtherCode(otherCode);
@@ -49,14 +45,6 @@ public class PomDataSet {
 
     public void setId(long id) {
         this.id = id;
-    }
-
-    public String getHead() {
-        return head;
-    }
-
-    public void setHead(String head) {
-        this.head = head;
     }
 
     public String getProjectAttributes() {
@@ -90,5 +78,31 @@ public class PomDataSet {
     public void setGavDataSet(GavDataSet gavDataSet) {
         gavDataSet.setPomDataSet(this);
         this.gavDataSet = gavDataSet;
+    }
+
+    @Override
+    public String toString() {
+        return  "GavDataSet={id=" + id + ", projectAttributes.length='" + projectAttributes.length()
+                + "', modelVersion='" + modelVersion + "', otherCode.length='" + otherCode.length() + "'}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        PomDataSet that = (PomDataSet) o;
+        if (!Objects.equals(projectAttributes, that.projectAttributes)) return false;
+        if (!Objects.equals(modelVersion, that.modelVersion)) return false;
+        if (!Objects.equals(otherCode, that.otherCode)) return false;
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 31;
+        result = 31 * result + (projectAttributes != null ? projectAttributes.hashCode() : 0);
+        result = 31 * result + (modelVersion != null ? modelVersion.hashCode() : 0);
+        result = 31 * result + (otherCode != null ? otherCode.hashCode() : 0);
+        return result;
     }
 }
