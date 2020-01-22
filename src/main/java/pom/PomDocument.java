@@ -42,12 +42,8 @@ public class PomDocument {
 
     private Document document;
 
-    public PomDocument(String xmlCode) {
+    public PomDocument(String xmlCode) throws ParserConfigurationException, SAXException {
         document = parseFromString(xmlCode);
-    }
-
-    public PomDocument(File file) {
-        document = parseFromFile(file.getName());
     }
 
     public String getProjectAttributes() {
@@ -178,26 +174,14 @@ public class PomDocument {
         return writer.toString();
     }
 
-    private static Document parseFromString(String xmlCOde) {
+    private static Document parseFromString(String xmlCOde) throws ParserConfigurationException, SAXException {
         try (InputStream inputStream = new ByteArrayInputStream(xmlCOde.getBytes(StandardCharsets.UTF_8))) {
             DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = documentBuilder.parse(inputStream);
             document.setXmlStandalone(true);
             return document;
-        } catch (ParserConfigurationException | SAXException | IOException e) {
+        } catch (IOException e) {
             LOGGER.log(Level.ERROR, "XML parsing error", e);
-            return null;
-        }
-    }
-
-    private static Document parseFromFile(String uri) {
-        try {
-            DocumentBuilder documentBuilder = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-            Document document = documentBuilder.parse(uri);
-            document.setXmlStandalone(true);
-            return document;
-        } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.log(Level.ERROR, "XML Parsing error", e);
             return null;
         }
     }

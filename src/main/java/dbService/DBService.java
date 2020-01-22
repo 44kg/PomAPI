@@ -79,18 +79,18 @@ public class DBService {
         for (GavDataSet gavDataSet : gavDataSets) {
             if (gavDataSet.getPomDataSet() != null) return gavDataSet.getPomDataSet();
         }
-        return null; //добавить строитель, если есть только зависимый гав
+        return null;
     }
 
     public Set<GavDataSet> getMostUsedGavs(int amount) {
         Session session = sessionFactory.openSession();
         GavsDAO gavsDAO = new GavsDAO(session);
         List<BigInteger> list = gavsDAO.getMostUsedGavIds(amount);
-        session.close();
         Set<GavDataSet> gavDataSets = new HashSet<>();
         for (BigInteger id : list) {
             gavDataSets.add(gavsDAO.get(id.longValue()));
         }
+        session.close();
         return gavDataSets;
     }
 
