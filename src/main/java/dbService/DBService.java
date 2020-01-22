@@ -51,7 +51,6 @@ public class DBService {
         GavsDAO gavsDAO = new GavsDAO(session);
         List<GavDataSet> gavDataSets = gavsDAO.get(groupId, artifactId, version);
         session.close();
-        if (gavDataSets.size() == 0) return null;
         Set<GavDataSet> dependentGavs = new HashSet<>();
         for (GavDataSet gavDataSet : gavDataSets) {
             dependentGavs.addAll(gavDataSet.getDependentGavs());
@@ -64,7 +63,6 @@ public class DBService {
         GavsDAO gavsDAO = new GavsDAO(session);
         List<GavDataSet> gavDataSets = gavsDAO.get(groupId, artifactId, version);
         session.close();
-        if (gavDataSets.size() == 0) return null;
         Set<GavDataSet> mainGavs = new HashSet<>();
         for (GavDataSet gavDataSet : gavDataSets) {
             mainGavs.addAll(gavDataSet.getMainGavs());
@@ -88,6 +86,7 @@ public class DBService {
         Session session = sessionFactory.openSession();
         GavsDAO gavsDAO = new GavsDAO(session);
         List<BigInteger> list = gavsDAO.getMostUsedGavIds(amount);
+        session.close();
         Set<GavDataSet> gavDataSets = new HashSet<>();
         for (BigInteger id : list) {
             gavDataSets.add(gavsDAO.get(id.longValue()));
@@ -116,9 +115,5 @@ public class DBService {
         builder.applySettings(configuration.getProperties());
         ServiceRegistry serviceRegistry = builder.build();
         return configuration.buildSessionFactory(serviceRegistry);
-    }
-
-    public SessionFactory getSessionFactory() {
-        return sessionFactory;
     }
 }

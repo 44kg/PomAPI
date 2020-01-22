@@ -1,5 +1,7 @@
 package dbService.dataSets;
 
+import org.hibernate.annotations.Type;
+
 import javax.persistence.*;
 import java.util.Objects;
 
@@ -17,6 +19,7 @@ public class PomDataSet {
     @Column(name = "model_version")
     private String modelVersion;
 
+    @Type(type = "text")
     @Column(name = "other_code")
     private String otherCode;
 

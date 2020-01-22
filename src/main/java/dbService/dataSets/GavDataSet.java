@@ -1,9 +1,7 @@
 package dbService.dataSets;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Table(name = "gavs")
@@ -50,6 +48,14 @@ public class GavDataSet {
         this.setVersion(version);
         this.setPomDataSet(pomDataSet);
         this.setDependentGavs(gavDataSets);
+    }
+
+    public Map<String, String> getMap() {
+        Map<String, String> map = new HashMap<>();
+        map.put("groupId", groupId);
+        map.put("artifactId", artifactId);
+        map.put("version", version);
+        return map;
     }
 
     public long getId() {
