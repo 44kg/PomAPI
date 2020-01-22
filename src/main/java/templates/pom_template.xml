@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project ${projectAttributes}>
+    <modelVersion>${modelVersion}</modelVersion>
+
+    <groupId>${groupId}</groupId>
+    <artifactId>${artifactId}</artifactId>
+    <version>${version}</version>
+
+    ${otherCode}
+
+    <dependencies>
+        ${dependencies}
+    </dependencies>
+
+</project>

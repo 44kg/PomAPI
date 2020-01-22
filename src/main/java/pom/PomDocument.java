@@ -1,6 +1,10 @@
 package pom;
 
 import dbService.dataSets.GavDataSet;
+import dbService.dataSets.PomDataSet;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -17,11 +21,24 @@ import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class PomDocument {
     private static final Logger LOGGER = LogManager.getLogger(PomDocument.class);
+
+    public static final String TEMPLATE_FILE = "src/main/java/templates/pom_template.xml";
+
+    public static final String XML_HEAD = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
+    public static final String PROJECT_ATTRIBUTES = "projectAttributes";
+    public static final String MODEL_VERSION = "modelVersion";
+    public static final String GROUP_ID = "groupId";
+    public static final String ARTIFACT_ID = "artifactId";
+    public static final String VERSION = "version";
+    public static final String OTHER_CODE = "otherCode";
+    public static final String DEPENDENCIES = "dependencies";
 
     private Document document;
 
@@ -46,22 +63,22 @@ public class PomDocument {
     }
 
     public String getModelVersion() {
-        NodeList model = document.getElementsByTagName("modelVersion");
+        NodeList model = document.getElementsByTagName(MODEL_VERSION);
         return model.item(0).getTextContent();
     }
 
     public GavDataSet getMainGav() {
-        String groupId = document.getElementsByTagName("groupId").item(0).getTextContent();
-        String artifactId = document.getElementsByTagName("artifactId").item(0).getTextContent();
-        String version = document.getElementsByTagName("version").item(0).getTextContent();
+        String groupId = document.getElementsByTagName(GROUP_ID).item(0).getTextContent();
+        String artifactId = document.getElementsByTagName(ARTIFACT_ID).item(0).getTextContent();
+        String version = document.getElementsByTagName(VERSION).item(0).getTextContent();
         return new GavDataSet(groupId, artifactId, version);
     }
 
     public Set<GavDataSet> getDependentGavs() {
         Set<GavDataSet> gavsSet = new HashSet<>();
-        NodeList groupIdList = document.getElementsByTagName("groupId");
-        NodeList artifactIdList = document.getElementsByTagName("artifactId");
-        NodeList versionList = document.getElementsByTagName("version");
+        NodeList groupIdList = document.getElementsByTagName(GROUP_ID);
+        NodeList artifactIdList = document.getElementsByTagName(ARTIFACT_ID);
+        NodeList versionList = document.getElementsByTagName(VERSION);
         for (int i = 1; i < groupIdList.getLength(); i++) {
             gavsSet.add(new GavDataSet(groupIdList.item(i).getTextContent(), artifactIdList.item(i).getTextContent(),
                     versionList.item(i).getTextContent()));
@@ -71,17 +88,48 @@ public class PomDocument {
 
     public String getOtherCode() {
         Node node = document.cloneNode(true).getChildNodes().item(0);
-        removeTag(node, "dependencies");
-        removeTag(node, "modelVersion");
-        removeTag(node, "groupId");
-        removeTag(node, "artifactId");
-        removeTag(node, "version");
+        removeTag(node, DEPENDENCIES);
+        removeTag(node, MODEL_VERSION);
+        removeTag(node, GROUP_ID);
+        removeTag(node, ARTIFACT_ID);
+        removeTag(node, VERSION);
         removeTextNodes(node);
 
         NodeList nodeList = node.getChildNodes();
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < nodeList.getLength(); i++) {
             builder.append(getString(nodeList.item(i)));
+        }
+        return builder.toString().replace(XML_HEAD, "");
+    }
+
+    public static String assembleXML(PomDataSet pomDataSet) throws IOException, TemplateException {
+        Map<String, String> variables = new HashMap<>();
+        variables.put(PROJECT_ATTRIBUTES, pomDataSet.getProjectAttributes());
+        variables.put(MODEL_VERSION, pomDataSet.getModelVersion());
+        variables.put(GROUP_ID, pomDataSet.getGavDataSet().getGroupId());
+        variables.put(ARTIFACT_ID, pomDataSet.getGavDataSet().getArtifactId());
+        variables.put(VERSION, pomDataSet.getGavDataSet().getVersion());
+        variables.put(OTHER_CODE, pomDataSet.getOtherCode());
+        variables.put(DEPENDENCIES, assembleXmlGav(pomDataSet.getGavDataSet().getDependentGavs()));
+
+        Writer stream = new StringWriter();
+        Template template = new Configuration().getTemplate(TEMPLATE_FILE);
+        template.process(variables, stream);
+        return stream.toString();
+    }
+
+    private static String assembleXmlGav(Set<GavDataSet> gavDataSets) {
+        StringBuilder builder = new StringBuilder();
+        for (GavDataSet gav : gavDataSets) {
+            builder.append("<").append(DEPENDENCIES).append(">");
+            builder.append("<").append(GROUP_ID).append(">").append(gav.getGroupId())
+                    .append("</").append(GROUP_ID).append(">");
+            builder.append("<").append(ARTIFACT_ID).append(">").append(gav.getArtifactId())
+                    .append("</").append(ARTIFACT_ID).append(">");
+            builder.append("<").append(VERSION).append(">").append(gav.getVersion())
+                    .append("</").append(VERSION).append(">");
+            builder.append("</").append(DEPENDENCIES).append(">");
         }
         return builder.toString();
     }
@@ -125,7 +173,7 @@ public class PomDocument {
             Transformer transformer = tf.newTransformer();
             transformer.transform(domSource, result);
         } catch (TransformerException e) {
-            LOGGER.log(Level.ERROR, "", e);
+            LOGGER.log(Level.ERROR, "POM document transforming to string error", e);
         }
         return writer.toString();
     }
@@ -137,7 +185,7 @@ public class PomDocument {
             document.setXmlStandalone(true);
             return document;
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.log(Level.ERROR, "Parsing error", e);
+            LOGGER.log(Level.ERROR, "XML parsing error", e);
             return null;
         }
     }
@@ -149,7 +197,7 @@ public class PomDocument {
             document.setXmlStandalone(true);
             return document;
         } catch (ParserConfigurationException | SAXException | IOException e) {
-            LOGGER.log(Level.ERROR, "Parsing error", e);
+            LOGGER.log(Level.ERROR, "XML Parsing error", e);
             return null;
         }
     }
