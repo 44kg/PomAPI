@@ -2,6 +2,7 @@ package servlets;
 
 import com.google.gson.Gson;
 import dbService.DBService;
+import dbService.dataSets.GavDataSet;
 import org.apache.log4j.Level;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
@@ -16,8 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class InsertPomServlet extends HttpServlet {
     private static final Logger LOGGER = LogManager.getLogger(InsertPomServlet.class);
@@ -54,18 +54,45 @@ public class InsertPomServlet extends HttpServlet {
             return;
         }
 
-        dbService.insertPom(pomDocument.getProjectAttributes(), pomDocument.getModelVersion(),
-                pomDocument.getOtherCode(), pomDocument.getMainGav(), pomDocument.getDependentGavs());
+        GavDataSet mainGav = pomDocument.getMainGav();
+        Set<GavDataSet> dependentGavs = pomDocument.getDependentGavs();
 
-        Gson gson = new Gson();
-        Map<String, String> map = new HashMap<>();
-        map.put("insert", "true");
+        dbService.insertPom(pomDocument.getProjectAttributes(), pomDocument.getModelVersion(),
+                pomDocument.getOtherCode(), mainGav, dependentGavs);
+
+        String json = buildJson(mainGav, dependentGavs);
 
         try {
-            Servlet.sendResponse(response, gson.toJson(map), Servlet.JSON_CONTENT_TYPE, HttpServletResponse.SC_OK);
+            Servlet.sendResponse(response, json, Servlet.JSON_CONTENT_TYPE, HttpServletResponse.SC_OK);
         } catch (IOException e) {
             LOGGER.log(Level.ERROR, "Response sending error.", e);
             Servlet.sendResponse(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private static String buildJson(GavDataSet mainGav, Set<GavDataSet> dependentGavs) {
+        Map<String, List<Map<String, String>>> mapForJson = new HashMap<>();
+
+        Map<String, String> mainGavMap = new HashMap<>();
+        mainGavMap.put(PomDocument.GROUP_ID, mainGav.getGroupId());
+        mainGavMap.put(PomDocument.ARTIFACT_ID, mainGav.getArtifactId());
+        mainGavMap.put(PomDocument.VERSION, mainGav.getVersion());
+        List<Map<String, String>> mainGavList = new ArrayList<>();
+        mainGavList.add(mainGavMap);
+
+        List<Map<String, String>> depGavList = new ArrayList<>();
+        Map<String, String> depGavMap;
+        for (GavDataSet depGav : dependentGavs) {
+            depGavMap = new HashMap<>();
+            depGavMap.put(PomDocument.GROUP_ID, depGav.getGroupId());
+            depGavMap.put(PomDocument.ARTIFACT_ID, depGav.getArtifactId());
+            depGavMap.put(PomDocument.VERSION, depGav.getVersion());
+            depGavList.add(depGavMap);
+        }
+
+        mapForJson.put("mainGav", mainGavList);
+        mapForJson.put("dependentGavs", depGavList);
+
+        return new Gson().toJson(mapForJson);
     }
 }
