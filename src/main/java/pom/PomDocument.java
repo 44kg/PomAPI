@@ -52,7 +52,7 @@ public class PomDocument {
         StringBuilder builder = new StringBuilder();
         for (int i = 0; i < map.getLength(); i++) {
             if (map.item(i).getNodeType() == Node.ATTRIBUTE_NODE) {
-                builder.append(map.item(i).getNodeName()).append("=").append(map.item(i).getTextContent()).append(" ");
+                builder.append(map.item(i).getNodeName()).append("=\"").append(map.item(i).getTextContent()).append("\" ");
             }
         }
         return builder.toString();

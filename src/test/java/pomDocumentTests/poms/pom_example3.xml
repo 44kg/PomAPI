@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project>
+    <modelVersion>modelVersion</modelVersion>
+
+    <groupId>groupId</groupId>
+    <artifactId>artifactId</artifactId>
+    <version>version</version>
+
+    <test>value</test>
+
+    <dependencies>
+
+        <dependency>
+            <groupId>test1</groupId>
+            <artifactId>test1</artifactId>
+            <version>test1</version>
+        </dependency>
+
+        <dependency>
+            <groupId>test2</groupId>
+            <artifactId>test2</artifactId>
+            <version>test2</version>
+        </dependency>
+
+    </dependencies>
+
+</project>
