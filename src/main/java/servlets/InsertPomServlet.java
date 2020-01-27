@@ -60,6 +60,11 @@ public class InsertPomServlet extends HttpServlet {
         long id = dbService.insertPom(pomDocument.getProjectAttributes(), pomDocument.getModelVersion(),
                 pomDocument.getOtherCode(), mainGav, dependentGavs);
 
+        if (id == -1L) {
+            Servlet.sendResponse(response, HttpServletResponse.SC_NO_CONTENT);
+            return;
+        }
+
         PomDataSet pomDataSet = dbService.getPomById(id);
         String json = pomDataSet.toJson();
 

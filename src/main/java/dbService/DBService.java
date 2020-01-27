@@ -43,6 +43,7 @@ public class DBService {
 
     public long insertPom(String projectAttributes, String modelVersion, String otherCode, GavDataSet mainGav,
                           Set<GavDataSet> dependentGavs) {
+        if (getPom(mainGav.getGroupId(), mainGav.getArtifactId(), mainGav.getVersion()) != null) return -1L;
         PomDataSet pomDataSet = new PomDataSet(projectAttributes, modelVersion, otherCode);
         mainGav.setDependentGavs(dependentGavs);
         pomDataSet.setGavDataSet(mainGav);
