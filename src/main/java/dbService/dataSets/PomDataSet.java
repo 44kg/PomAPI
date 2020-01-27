@@ -1,9 +1,10 @@
 package dbService.dataSets;
 
+import com.google.gson.Gson;
 import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
-import java.util.Objects;
+import java.util.*;
 
 @Entity
 @Table(name = "poms")
@@ -40,6 +41,21 @@ public class PomDataSet {
         this.setOtherCode(otherCode);
         gavDataSet.setPomDataSet(this);
         this.setGavDataSet(gavDataSet);
+    }
+
+    public String toJson() {
+        Map<String, Object> map = new HashMap<>();
+        map.put("id", id);
+        map.put("mainGav", getGavDataSet().toMap());
+
+        List<Map<String, String>> depList = new ArrayList<>();
+        Set<GavDataSet> depGavs = getGavDataSet().getDependentGavs();
+        for (GavDataSet gav : depGavs) {
+            depList.add(gav.toMap());
+        }
+        map.put("dependentGavs", depList);
+
+        return new Gson().toJson(map);
     }
 
     public long getId() {

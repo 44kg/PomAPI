@@ -41,7 +41,7 @@ public class GetMostUsedGavsServlet extends HttpServlet {
 
         List<Map<String, String>> list = new ArrayList<>();
         for (GavDataSet gav : gavDataSets) {
-            list.add(gav.getMap());
+            list.add(gav.toMap());
         }
 
         String json = new Gson().toJson(list);

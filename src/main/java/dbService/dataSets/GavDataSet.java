@@ -50,7 +50,7 @@ public class GavDataSet {
         this.setDependentGavs(gavDataSets);
     }
 
-    public Map<String, String> getMap() {
+    public Map<String, String> toMap() {
         Map<String, String> map = new HashMap<>();
         map.put("groupId", groupId);
         map.put("artifactId", artifactId);

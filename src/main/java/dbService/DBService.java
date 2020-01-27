@@ -33,7 +33,15 @@ public class DBService {
         sessionFactory = createSessionFactory(configuration);
     }
 
-    public void insertPom(String projectAttributes, String modelVersion, String otherCode, GavDataSet mainGav,
+    public PomDataSet getPomById(long id) {
+        Session session = sessionFactory.openSession();
+        PomsDAO pomsDAO = new PomsDAO(session);
+        PomDataSet pomDataSet = pomsDAO.get(id);
+        session.close();
+        return pomDataSet;
+    }
+
+    public long insertPom(String projectAttributes, String modelVersion, String otherCode, GavDataSet mainGav,
                           Set<GavDataSet> dependentGavs) {
         PomDataSet pomDataSet = new PomDataSet(projectAttributes, modelVersion, otherCode);
         mainGav.setDependentGavs(dependentGavs);
@@ -41,9 +49,10 @@ public class DBService {
         Session session = sessionFactory.openSession();
         Transaction transaction = session.beginTransaction();
         PomsDAO pomsDAO = new PomsDAO(session);
-        pomsDAO.insert(pomDataSet);
+        long id = pomsDAO.insert(pomDataSet);
         transaction.commit();
         session.close();
+        return id;
     }
 
     public Set<GavDataSet> getDependentGavs(String groupId, String artifactId, String version) {
