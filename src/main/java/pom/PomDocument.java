@@ -76,8 +76,10 @@ public class PomDocument {
         NodeList artifactIdList = document.getElementsByTagName(ARTIFACT_ID);
         NodeList versionList = document.getElementsByTagName(VERSION);
         for (int i = 1; i < groupIdList.getLength(); i++) {
-            gavsSet.add(new GavDataSet(groupIdList.item(i).getTextContent(), artifactIdList.item(i).getTextContent(),
-                    versionList.item(i).getTextContent()));
+            if (groupIdList.item(i).getParentNode().getParentNode().getNodeName().equals(DEPENDENCIES)) {
+                gavsSet.add(new GavDataSet(groupIdList.item(i).getTextContent(), artifactIdList.item(i).getTextContent(),
+                        versionList.item(i).getTextContent()));
+            }
         }
         return gavsSet;
     }
